@@ -19,11 +19,7 @@ var getRandomNumber = function (min, max) {
 };
 
 var randomNumber = function (number) {
-  var numberClone = number.sort(function () {
-    return Math.random() - 0.5;
-  }).slice();
-
-  return numberClone.splice(0, getRandomNumber(1, numberClone.length));
+  return number.splice(0, getRandomNumber(1, number.length));
 };
 
 var getPins = function () {
@@ -31,14 +27,8 @@ var getPins = function () {
   var pinsList = [];
 
   for (var i = 0; i < MAX_USERS; i++) {
-    var photosRandom = randomNumber(photos);
-    var featuresRandom = randomNumber(featureses);
-    var location = {
-      x: getRandomNumber(0, map.offsetWidth) - (PIN_WIDTH / 2),
-      y: getRandomNumber(130, 630) - PIN_HEIGHT
-    };
 
-    var pins = {
+    var pin = {
       author: {
         avatar: 'img/avatars/user0' + (i + 1) + '.png'
       },
@@ -51,13 +41,16 @@ var getPins = function () {
         checkin: checkins[getRandomNumber(0, checkins.length - 1)],
         checkout: checkins[getRandomNumber(0, checkins.length - 1)],
         description: descriptions[getRandomNumber(0, descriptions.length - 1)],
-        photos: photosRandom,
+        photos: randomNumber(photos),
         type: types[getRandomNumber(0, types.length - 1)],
-        features: featuresRandom
+        features: randomNumber(featureses)
       },
-      location: location
+      location: {
+        x: getRandomNumber(0, map.offsetWidth) - (PIN_WIDTH / 2),
+        y: getRandomNumber(130, 630) - PIN_HEIGHT
+      }
     };
-    pinsList.push(pins);
+    pinsList.push(pin);
   }
   return pinsList;
 };
