@@ -53,7 +53,7 @@ var getPins = function () {
       },
       offer: {
         title: titles[getRandomNumber(MIN_NUMBER, titles.length - 1)],
-        address: location.x + ' ' + location.y,
+        address: getRandomNumber(600, 350),
         price: getRandomNumber(1000, 1500),
         rooms: getRandomNumber(1, 3),
         guests: getRandomNumber(1, 10),
