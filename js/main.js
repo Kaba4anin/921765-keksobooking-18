@@ -3,7 +3,6 @@
 var map = document.querySelector('.map');
 var mapPinTemplate = document.querySelector('#pin').content.querySelector('.map__pin');
 var cardTemplate = document.querySelector('#card').content.querySelector('.map__card');
-var mapPins = document.querySelector('.map__pins');
 var titles = ['Сдам', 'Не сдам', 'Продам', 'Не продам', 'Сниму', 'Не сниму'];
 var PLACE_TYPE = {
   palace: 'Дворец',
@@ -19,8 +18,14 @@ var MIN_NUMBER = 0;
 var PIN_WIDTH = 50;
 var PIN_HEIGHT = 70;
 var MAX_USERS = 8;
+var ENTER_KEYCODE = 13;
 
-map.classList.remove('map--faded');
+var adForm = document.querySelector('.ad-form');
+var mapPinMain = document.querySelector('.map__pin--main');
+var adFormElement = adForm.querySelectorAll('.ad-form__element');
+var address = document.querySelector('#address');
+var inputPrice = adForm.querySelector('#price');
+var inputTitle = adForm.querySelector('#title');
 
 var getRandomNumber = function (min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -121,6 +126,14 @@ var renderCard = function (pin) {
 };
 
 var getAdverts = function () {
+  map.classList.remove('map--faded');
+  document.querySelector('.ad-form').classList.remove('ad-form--disabled');
+
+  adFormElement.forEach(function (evt) {
+    evt.removeAttribute('disabled');
+  });
+
+  var mapPins = map.querySelector('.map__pins');
   var fragment = document.createDocumentFragment();
   var offers = getPins();
   for (var i = 0; i < offers.length; i++) {
@@ -131,5 +144,51 @@ var getAdverts = function () {
   return offers;
 };
 
-getAdverts();
+adFormElement.forEach(function (evt) {
+  evt.setAttribute('disabled', 'disabled');
+});
 
+address.value = mapPinMain.style.left + ' ' + mapPinMain.style.top;
+
+var mapPinClickHandler = function () {
+  getAdverts();
+  mapPinMain.removeEventListener('mousedown', mapPinClickHandler);
+  mapPinMain.removeEventListener('keydown', mapPinEnterHandler);
+};
+
+var mapPinEnterHandler = function (evt) {
+  if (evt.keyCode === ENTER_KEYCODE) {
+    getAdverts();
+    mapPinMain.removeEventListener('keydown', mapPinEnterHandler);
+    mapPinMain.removeEventListener('mousedown', mapPinClickHandler);
+  }
+};
+
+mapPinMain.addEventListener('mousedown', mapPinClickHandler);
+mapPinMain.addEventListener('keydown', mapPinEnterHandler);
+
+inputPrice.addEventListener('input', function () {
+  if (inputPrice.validity.rangeOverflow) {
+    inputPrice.setCustomValidity('Максимальное значение — 1 000 000');
+  } else if (inputPrice.validity.badInput) {
+    inputPrice.setCustomValidity('Неправильный формат');
+  } else if (inputPrice.validity.valueMissing) {
+    inputPrice.setCustomValidity('Обязательное поле');
+  } else {
+    inputPrice.setCustomValidity('');
+  }
+});
+
+inputTitle.addEventListener('input', function () {
+  if (inputTitle.validity.tooShort) {
+    inputTitle.setCustomValidity('Минимальная длина — 30 символов');
+  } else if (inputTitle.validity.tooLong) {
+    inputTitle.setCustomValidity('Максимальная длина — 100 символов');
+  } else if (inputTitle.validity.badInput) {
+    inputTitle.setCustomValidity('Неправильный формат');
+  } else if (inputTitle.validity.valueMissing) {
+    inputTitle.setCustomValidity('Обязательное поле');
+  } else {
+    inputTitle.setCustomValidity('');
+  }
+});
