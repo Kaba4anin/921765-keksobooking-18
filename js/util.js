@@ -180,6 +180,7 @@
     mapPinMainPositionX: mapPinMainPositionX,
     mapPinMainPositionY: mapPinMainPositionY,
 
+
     typesArray: TYPES,
     featuresArray: FEATURES,
     photosArray: PHOTOS,
