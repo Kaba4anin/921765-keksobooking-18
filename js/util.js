@@ -1,7 +1,6 @@
 'use strict';
 
 (function () {
-  //  Константы
   var ESC_KEYCODE = 27;
   var ENTER_KEYCODE = 13;
   var POSITION_Y_MIN = 130;
@@ -17,56 +16,24 @@
   var MAIN_PIN_START_POSITION_X = document.querySelector('.map__pin--main').offsetLeft + 'px';
   var MAIN_PIN_START_POSITION_Y = document.querySelector('.map__pin--main').offsetTop + 'px';
 
-  //  Переменные
   var mapPinMain = document.querySelector('.map__pin--main');
   var fieldsets = document.querySelectorAll('fieldset');
-  var addressInput = document.querySelector('input[name = address]');
+  var addressInput = document.querySelector('input[name = "address"]');
   var mapPinMainPositionX = Math.round(mapPinMain.offsetLeft + (MAIN_PIN_WIDTH / 2));
   var mapPinMainPositionY = Math.round(mapPinMain.offsetTop + (MAIN_PIN_HEIGHT / 2));
+  var positionXMax = document.querySelector('.map').clientWidth;
 
-  //  Мокки
-  var TYPES = [
-    'palace',
-    'flat',
-    'house',
-    'bungalo',
-  ];
+  var ROOMS = ['комната', 'комнаты', 'комнат'];
 
-  var FEATURES = [
-    'wifi',
-    'dishwasher',
-    'parking',
-    'washer',
-    'elevator',
-    'conditioner',
-  ];
+  var GUESTS = ['гостя', 'гостей', 'гостей'];
 
-  var PHOTOS = [
-    'http://o0.github.io/assets/images/tokyo/hotel1.jpg',
-    'http://o0.github.io/assets/images/tokyo/hotel2.jpg',
-    'http://o0.github.io/assets/images/tokyo/hotel3.jpg',
-  ];
-
-  var ROOMS = [
-    'комната',
-    'комнаты',
-    'комнат',
-  ];
-
-  var GUESTS = [
-    'гостя',
-    'гостей',
-    'гостей',
-  ];
-
-  var PRICE = {
+  var tipeToPrice = {
     'bungalo': 0,
     'flat': 1000,
     'house': 5000,
-    'palace': 10000,
+    'palace': 10000
   };
 
-  //  Функция перемешивания массива
   var shuffle = function (array) {
     var j;
     var temp;
@@ -79,29 +46,25 @@
     return array;
   };
 
-  //  Функция получения массива случайной длины
   var getRandomPrefix = function (array) {
-    var toPop = getRandomInteger(0, array.length - 1); // определить сколько элементов уберем из копии массива
-    var result = shuffle(array.slice()); // скопировать массив
+    var toPop = getRandomInteger(0, array.length - 1);
+    var result = shuffle(array.slice());
     for (var i = 0; i < toPop; i += 1) {
-      result.pop(); //  убрать последний элемент
+      result.pop();
     }
     return result;
   };
 
-  // функция рандомного числа от min до max
   var getRandomInteger = function (min, max) {
     var rand = min + Math.random() * (max + 1 - min);
     return Math.floor(rand);
   };
 
-  //  Функция генерации случайного элемента из массива
   var getRandomElement = function (array) {
     var index = getRandomInteger(0, array.length - 1);
     return array[index];
   };
 
-  //  Перевод TYPES
   var getTranslateTypes = function (type) {
     var translate;
     if (type === 'palace') {
@@ -116,7 +79,6 @@
     return translate;
   };
 
-  // Иконка для features
   var getFeaturesPic = function (array) {
     var fragmentFeatures = document.createDocumentFragment();
     var featuresPic = document.createElement('li');
@@ -129,7 +91,6 @@
     return fragmentFeatures;
   };
 
-  //  Фотографии в карточке
   var getPhotos = function (array) {
     var fragmentPhotos = document.createDocumentFragment();
     var photos = document.createElement('img');
@@ -145,7 +106,6 @@
     return fragmentPhotos;
   };
 
-  //  Функция согласования существительных и чисел
   var connectNounAndNumbers = function (number, array) {
     number = Math.abs(number) % 100;
     var number1 = number % 10;
@@ -175,21 +135,15 @@
     mainPinActiveHeight: MAIN_PIN_ACTIVE_HEIGHT,
     mainPinStartPositionX: MAIN_PIN_START_POSITION_X,
     mainPinStartPositionY: MAIN_PIN_START_POSITION_Y,
-
     mapPinMain: mapPinMain,
     fieldsets: fieldsets,
     addressInput: addressInput,
     mapPinMainPositionX: mapPinMainPositionX,
     mapPinMainPositionY: mapPinMainPositionY,
-
-
-    typesArray: TYPES,
-    featuresArray: FEATURES,
-    photosArray: PHOTOS,
+    positionXMax: positionXMax,
     roomsArray: ROOMS,
     guestsArray: GUESTS,
-    priceObject: PRICE,
-
+    tipeToPrice: tipeToPrice,
     shuffle: shuffle,
     getRandomPrefix: getRandomPrefix,
     getRandomInteger: getRandomInteger,

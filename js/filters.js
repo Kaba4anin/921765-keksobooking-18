@@ -3,6 +3,7 @@
 (function () {
   var MAX_PRICE = 50000;
   var MIN_PRICE = 10000;
+
   var filtersContainer = document.querySelector('.map__filters-container');
   var mapFilters = filtersContainer.querySelector('.map__filters');
   var housingType = filtersContainer.querySelector('#housing-type');
@@ -46,7 +47,7 @@
     return checkedFeatures;
   };
 
-  var contains = function (where, what) {
+  var containsArray = function (where, what) {
     for (var i = 0; i < what.length; i++) {
       if (where.indexOf(what[i]) < 0) {
         return false;
@@ -57,10 +58,10 @@
 
   var filterCheckbox = function (object) {
     var checkedFeatures = filterCheckedFeatures();
-    return contains(object.offer.features, checkedFeatures);
+    return containsArray(object.offer.features, checkedFeatures);
   };
 
-  var allFilters = function () {
+  var getAllFilters = function () {
     return window.map.receivedData
     .filter(filterType)
     .filter(filterRooms)
@@ -69,12 +70,11 @@
     .filter(filterCheckbox);
   };
 
-  var getFilters = function () {
+  var mapFiltersHandler = window.debounce(function () {
     window.form.removePins();
     window.form.removePopupCards();
-    window.debounce(window.map.showPins(allFilters()));
-  };
+    window.map.showPins(getAllFilters());
+  });
 
-  mapFilters.addEventListener('change', getFilters);
-
+  mapFilters.addEventListener('change', mapFiltersHandler);
 })();

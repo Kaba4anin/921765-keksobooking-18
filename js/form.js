@@ -1,7 +1,7 @@
 'use strict';
 
 (function () {
-  //  3.1. Валидация для заголовка
+  var DEFAULT_AVATAR = 'img/muffin-grey.svg';
   var titleInput = document.querySelector('input[name="title"]');
   titleInput.addEventListener('invalid', function () {
     if (titleInput.validity.tooShort) {
@@ -15,15 +15,15 @@
     }
   });
 
-  //  В этом задании мы запрограммируем сценарий установки соответствия количества гостей с количеством комнат
   var roomsSelect = document.querySelector('select[name="rooms"]');
   var capacitySelect = document.querySelector('select[name="capacity"]');
   var maxValueMap = {
-    '1': 1, // capacitySelect index = 1
-    '2': 2, // capacitySelect index = 2
-    '3': 3, // capacitySelect index = 3
-    '100': 0, // capacitySelect index = 0
+    '1': 1,
+    '2': 2,
+    '3': 3,
+    '100': 0
   };
+
   roomsSelect.addEventListener('change', function () {
     var maxValue = parseInt(maxValueMap[roomsSelect.value], 10);
     if (capacitySelect.value !== maxValue) {
@@ -54,15 +54,14 @@
       capacitySelect[3].removeAttribute('disabled', '');
     }
   });
-  //  3.3. Поле «Тип жилья» влияет на минимальное значение поля «Цена за ночь»:
+
   var priceInput = document.querySelector('input[name="price"]');
   var type = document.querySelector('select[name="type"]');
   type.addEventListener('change', function () {
-    priceInput.setAttribute('min', window.util.priceObject[type.value]);
-    priceInput.placeholder = window.util.priceObject[type.value];
+    priceInput.setAttribute('min', window.util.tipeToPrice[type.value]);
+    priceInput.placeholder = window.util.tipeToPrice[type.value];
   });
 
-  //  3.2. Валидация цены за ночь:
   priceInput.addEventListener('invalid', function () {
     if (priceInput.validity.rangeOverflow) {
       priceInput.setCustomValidity('Максимальная цена за ночь — 1 000 000 руб.');
@@ -87,7 +86,6 @@
     }
   });
 
-  //  Поля «Время заезда» и «Время выезда» синхронизированы.
   var timeIn = document.querySelector('select[name="timein"]');
   var timeOut = document.querySelector('select[name="timeout"]');
   timeIn.addEventListener('change', function () {
@@ -97,7 +95,25 @@
     timeIn.value = timeOut.value;
   });
 
-  //  Функция удаления пинов
+  var avatarChooser = document.querySelector('.ad-form__field input[type="file"]');
+  var avatarPreview = document.querySelector('.ad-form-header__preview img');
+  avatarChooser.addEventListener('change', function () {
+    window.loadFiles.setPicture(avatarChooser, true, avatarPreview);
+  });
+  var photoChooser = document.querySelector('.ad-form__upload input[type="file"]');
+  photoChooser.addEventListener('change', function () {
+    var photoPreview = document.createElement('img');
+    window.loadFiles.setPicture(photoChooser, false, photoPreview);
+    document.querySelector('.ad-form__photo').appendChild(photoPreview);
+  });
+  var resetPicture = function () {
+    avatarPreview.src = DEFAULT_AVATAR;
+    var photoPreview = document.querySelectorAll('.ad-form__photo img');
+    photoPreview.forEach(function (element, i) {
+      photoPreview[i].remove();
+    });
+  };
+
   var removePins = function () {
     var pins = document.querySelectorAll('.map__pin:not(.map__pin--main)');
     pins.forEach(function (element, i) {
@@ -105,51 +121,44 @@
     });
   };
 
-  //  Функция закрытия карточек объявления Popup
   var removePopupCards = function () {
     if (map.querySelector('.popup')) {
       map.removeChild(map.querySelector('.popup'));
     }
   };
 
-  //  Функция деактивации страницы
   var map = document.querySelector('.map');
-  var getDisabledPage = function () {
+  var pageDisabledHandler = function () {
     document.querySelector('.map').classList.add('map--faded');
     document.querySelector('.ad-form').reset();
     document.querySelector('.map__filters').reset();
     document.querySelector('.ad-form').classList.add('ad-form--disabled');
     removePins();
     removePopupCards();
-    window.util.fieldsets.forEach(function (element, i) {
-      window.util.fieldsets[i].setAttribute('disabled', '');
-    });
+    resetPicture();
     window.util.mapPinMain.classList.remove('hidden');
     priceInput.placeholder = 1000;
-    window.util.addressInput.value = window.util.mapPinMainPositionX + ', ' + window.util.mapPinMainPositionY;
+    window.map.setMainPinCoordinates();
+    window.map.getDisabledFieldsets();
     window.util.mapPinMain.style.top = window.util.mainPinStartPositionY;
     window.util.mapPinMain.style.left = window.util.mainPinStartPositionX;
+    capacitySelect[0].setAttribute('disabled', '');
+    capacitySelect[1].removeAttribute('disabled', '');
+    capacitySelect[2].setAttribute('disabled', '');
+    capacitySelect[3].setAttribute('disabled', '');
   };
 
-  //  Обработчик клика по кнопке "очистить"
   var formReset = document.querySelector('.ad-form__reset');
+  formReset.addEventListener('click', pageDisabledHandler);
 
-  formReset.addEventListener('click', function () {
-    getDisabledPage();
-  });
-
-  //  Закрытие сообщения об успешной отправке формы или об ошибке
   var closeMessage = function (message) {
     message.remove();
   };
 
-  //  Функция показывающая сообщение об успешной отправке формы
   var showSuccessMessage = function () {
     var successMessageTemplate = document.querySelector('#success').content.querySelector('.success');
     var successMessageElement = successMessageTemplate.cloneNode(true);
-
     document.querySelector('main').insertAdjacentElement('afterbegin', successMessageElement);
-
     var successMessage = document.querySelector('.success');
     successMessage.addEventListener('click', function () {
       closeMessage(successMessage);
@@ -163,13 +172,10 @@
     });
   };
 
-  //  Функция показывающая сообщение об ошибке при отправке формы
-  window.showErrorMessage = function () {
+  var showErrorMessage = function () {
     var errorMessageTemplate = document.querySelector('#error').content.querySelector('.error');
     var errorMessageElement = errorMessageTemplate.cloneNode(true);
-
     document.querySelector('main').insertAdjacentElement('afterbegin', errorMessageElement);
-
     var errorMessage = document.querySelector('.error');
     errorMessage.addEventListener('click', function () {
       closeMessage(errorMessage);
@@ -183,22 +189,20 @@
     });
   };
 
-  //  Отправка данных формы на сервер
+  var successHandler = function () {
+    pageDisabledHandler();
+    showSuccessMessage();
+  };
+
   var form = document.querySelector('.ad-form');
   form.addEventListener('submit', function (evt) {
     evt.preventDefault();
-    window.backend.save(
-        new FormData(form),
-        function () {
-          getDisabledPage();
-          showSuccessMessage();
-        },
-        window.showErrorMessage
-    );
+    window.backend.save(new FormData(form), successHandler, showErrorMessage);
   });
 
   window.form = {
     removePins: removePins,
     removePopupCards: removePopupCards,
+    showErrorMessage: showErrorMessage,
   };
 })();
