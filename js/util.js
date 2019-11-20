@@ -46,15 +46,6 @@
     return array;
   };
 
-  var getRandomPrefix = function (array) {
-    var toPop = getRandomInteger(0, array.length - 1);
-    var result = shuffle(array.slice());
-    for (var i = 0; i < toPop; i += 1) {
-      result.pop();
-    }
-    return result;
-  };
-
   var getRandomInteger = function (min, max) {
     var rand = min + Math.random() * (max + 1 - min);
     return Math.floor(rand);
@@ -145,7 +136,6 @@
     guestsArray: GUESTS,
     tipeToPrice: tipeToPrice,
     shuffle: shuffle,
-    getRandomPrefix: getRandomPrefix,
     getRandomInteger: getRandomInteger,
     getRandomElement: getRandomElement,
     getTranslateTypes: getTranslateTypes,

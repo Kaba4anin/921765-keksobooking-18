@@ -25,7 +25,7 @@
   };
 
   roomsSelect.addEventListener('change', function () {
-    var maxValue = parseInt(maxValueMap[roomsSelect.value], 10);
+    var maxValue = maxValueMap[roomsSelect.value];
     if (capacitySelect.value !== maxValue) {
       capacitySelect.value = maxValue;
     }
@@ -101,16 +101,17 @@
     window.loadFiles.setPicture(avatarChooser, true, avatarPreview);
   });
   var photoChooser = document.querySelector('.ad-form__upload input[type="file"]');
+  var adFormPhoto = document.querySelector('.ad-form__photo');
   photoChooser.addEventListener('change', function () {
-    var photoPreview = document.createElement('img');
-    window.loadFiles.setPicture(photoChooser, false, photoPreview);
-    document.querySelector('.ad-form__photo').appendChild(photoPreview);
+    var photoPreviews = document.createElement('img');
+    window.loadFiles.setPicture(photoChooser, false, photoPreviews);
+    adFormPhoto.appendChild(photoPreviews);
   });
-  var resetPicture = function () {
+  var resetPictures = function () {
     avatarPreview.src = DEFAULT_AVATAR;
-    var photoPreview = document.querySelectorAll('.ad-form__photo img');
-    photoPreview.forEach(function (element, i) {
-      photoPreview[i].remove();
+    var photoPreviews = adFormPhoto.querySelectorAll('img');
+    photoPreviews.forEach(function (element, i) {
+      photoPreviews[i].remove();
     });
   };
 
@@ -124,18 +125,36 @@
   var removePopupCards = function () {
     if (map.querySelector('.popup')) {
       map.removeChild(map.querySelector('.popup'));
+      map.querySelector('.map__pin--active').classList.remove('map__pin--active');
     }
   };
 
+  var getDisabledFilters = function (array) {
+    var filters = array.querySelectorAll('.map__filter');
+    filters.forEach(function (element) {
+      element.setAttribute('disabled', 'disabled');
+    });
+  };
+
+  var removeDisabledFilters = function (array) {
+    var filters = array.querySelectorAll('.map__filter');
+    filters.forEach(function (element) {
+      element.removeAttribute('disabled');
+    });
+  };
+
   var map = document.querySelector('.map');
-  var pageDisabledHandler = function () {
-    document.querySelector('.map').classList.add('map--faded');
-    document.querySelector('.ad-form').reset();
-    document.querySelector('.map__filters').reset();
-    document.querySelector('.ad-form').classList.add('ad-form--disabled');
+  var mapFilters = map.querySelector('.map__filters');
+  var adForm = document.querySelector('.ad-form');
+  var pageDisabledClickHandler = function () {
+    map.classList.add('map--faded');
+    adForm.reset();
+    mapFilters.reset();
+    adForm.classList.add('ad-form--disabled');
+    getDisabledFilters(mapFilters);
     removePins();
     removePopupCards();
-    resetPicture();
+    resetPictures();
     window.util.mapPinMain.classList.remove('hidden');
     priceInput.placeholder = 1000;
     window.map.setMainPinCoordinates();
@@ -149,7 +168,7 @@
   };
 
   var formReset = document.querySelector('.ad-form__reset');
-  formReset.addEventListener('click', pageDisabledHandler);
+  formReset.addEventListener('click', pageDisabledClickHandler);
 
   var closeMessage = function (message) {
     message.remove();
@@ -160,16 +179,17 @@
     var successMessageElement = successMessageTemplate.cloneNode(true);
     document.querySelector('main').insertAdjacentElement('afterbegin', successMessageElement);
     var successMessage = document.querySelector('.success');
-    successMessage.addEventListener('click', function () {
-      closeMessage(successMessage);
-    });
-
-    document.addEventListener('keydown', function (evt) {
+    var closeMessagePressHandler = function (evt) {
       if (evt.keyCode === window.util.escKeycode) {
         closeMessage(successMessage);
         evt.preventDefault();
       }
+      document.removeEventListener('keydown', closeMessagePressHandler);
+    };
+    successMessage.addEventListener('click', function () {
+      closeMessage(successMessage);
     });
+    document.addEventListener('keydown', closeMessagePressHandler);
   };
 
   var showErrorMessage = function () {
@@ -190,7 +210,7 @@
   };
 
   var successHandler = function () {
-    pageDisabledHandler();
+    pageDisabledClickHandler();
     showSuccessMessage();
   };
 
@@ -204,5 +224,6 @@
     removePins: removePins,
     removePopupCards: removePopupCards,
     showErrorMessage: showErrorMessage,
+    removeDisabledFilters: removeDisabledFilters
   };
 })();

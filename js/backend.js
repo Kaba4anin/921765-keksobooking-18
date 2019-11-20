@@ -8,6 +8,7 @@
   var save = function (data, successHandler, errorHandler) {
     var xhr = new XMLHttpRequest();
     xhr.responseType = 'json';
+    xhr.timeout = 10000;
 
     xhr.addEventListener('load', function () {
       if (xhr.status === STATUS_SUCCESS) {
@@ -15,6 +16,14 @@
       } else {
         errorHandler('Статус ответа: ' + xhr.status + ' ' + xhr.statusText);
       }
+    });
+
+    xhr.addEventListener('error', function () {
+      errorHandler('Произошла ошибка соединения. Пожалуйста, обновите страницу');
+    });
+
+    xhr.addEventListener('timeout', function () {
+      errorHandler('Запрос не успел выполниться за ' + xhr.timeout + 'мс');
     });
 
     xhr.open('POST', URL);

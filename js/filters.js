@@ -13,15 +13,24 @@
   var housingFeatures = filtersContainer.querySelector('#housing-features');
 
   var filterType = function (object) {
-    return (housingType.value === 'any') ? true : object.offer.type === housingType.value;
+    return (
+      housingType.value === 'any' ||
+      object.offer.type === housingType.value
+    );
   };
 
   var filterRooms = function (object) {
-    return (housingRooms.value === 'any') ? true : object.offer.rooms === parseInt(housingRooms.value, 10);
+    return (
+      housingRooms.value === 'any' ||
+      object.offer.rooms === parseInt(housingRooms.value, 10)
+    );
   };
 
   var filterGuests = function (object) {
-    return (housingGuests.value === 'any') ? true : object.offer.guests === parseInt(housingGuests.value, 10);
+    return (
+      housingGuests.value === 'any' ||
+      object.offer.guests === parseInt(housingGuests.value, 10)
+    );
   };
 
   var filterPrice = function (object) {
@@ -61,19 +70,20 @@
     return containsArray(object.offer.features, checkedFeatures);
   };
 
-  var getAllFilters = function () {
-    return window.map.receivedData
-    .filter(filterType)
-    .filter(filterRooms)
-    .filter(filterGuests)
-    .filter(filterPrice)
-    .filter(filterCheckbox);
+  var getAllFilters = function (filteredElement) {
+    return filteredElement.filter(function (element) {
+      return filterType(element) &&
+             filterPrice(element) &&
+             filterRooms(element) &&
+             filterGuests(element) &&
+             filterCheckbox(element);
+    }).slice(0, window.util.MAX_PINS_COUNT);
   };
 
   var mapFiltersHandler = window.debounce(function () {
     window.form.removePins();
     window.form.removePopupCards();
-    window.map.showPins(getAllFilters());
+    window.map.showPins(getAllFilters(window.map.receivedData));
   });
 
   mapFilters.addEventListener('change', mapFiltersHandler);
